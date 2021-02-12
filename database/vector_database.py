@@ -11,7 +11,7 @@ import faiss
 import numpy as np
 import _pickle as pickle
 
-class Database:
+class VectorDatabase:
   """
     Database for storing Vectors and searching them by
     similarity.
