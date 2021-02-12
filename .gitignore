@@ -1,0 +1,7 @@
+# Python Compiled Files
+__pycache__/
+.*.pyc
+
+# VIM Remedies
+.*.swp
+.*.swo
