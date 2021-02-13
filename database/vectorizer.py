@@ -7,7 +7,12 @@ class Vectorize(object):
     if model.lower().strip() == "en_core_web_sm":
       logging.warn("Not the right model for vectorizing statements, loading anyway")
     self._model_name = model
-  def open(self):
     self._vmodel = spacy.load(self._model_name)
-  def vectorize(self, sentence):
-    return self._vmodel(sentence).vector
+    self._vdim = self._vmodel("dummy").shape[1]
+
+  @property
+  def dimension(self):
+    return self._vdim
+
+  def __call__(self, sentence):
+    return self._vmodel(sentence)

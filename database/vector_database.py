@@ -11,7 +11,7 @@ import faiss
 import numpy as np
 import _pickle as pickle
 
-class VectorDatabase:
+class VectorDB:
   """
     Database for storing Vectors and searching them by
     similarity.
@@ -66,12 +66,13 @@ class VectorDatabase:
       except:
         self._init = False
         raise
-      return
+      return self
     print("No database found. Initializing a new one")
     self._init = False
     self._index = faiss.IndexFlatL2(self._vector_dim)
     self._payload = np.asarray([], dtype=str)
     self._inv_payload = dict()
+    return self
 
   def nearest(self, vector, num_closest=1):
     """
