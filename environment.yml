@@ -32,10 +32,13 @@ dependencies:
   - zlib=1.2.11=h1de35cc_3
   - pip:
     - absl-py==0.11.0
+    - addict==2.4.0
+    - argparse==1.4.0
     - blis==0.7.4
     - catalogue==2.0.1
     - chardet==4.0.0
     - click==7.1.2
+    - confuse==1.4.0
     - contextvars==2.4
     - cymem==2.0.5
     - dataclasses==0.8
@@ -44,20 +47,29 @@ dependencies:
     - immutables==0.15
     - importlib-metadata==3.4.0
     - jinja2==2.11.3
+    - joblib==1.0.1
     - markupsafe==1.1.1
     - murmurhash==1.0.5
+    - nltk==3.5
     - numpy==1.19.5
     - packaging==20.9
     - pathy==0.3.6
     - preshed==3.0.5
     - pydantic==1.7.3
     - pyparsing==2.4.7
+    - pyyaml==5.4.1
+    - regex==2020.11.13
     - requests==2.25.1
+    - scikit-learn==0.24.1
+    - scipy==1.5.4
+    - selenium==3.141.0
+    - sklearn==0.0
     - smart-open==3.0.0
     - spacy==3.0.1
     - spacy-legacy==3.0.1
     - srsly==2.4.0
     - thinc==8.0.1
+    - threadpoolctl==2.1.0
     - tqdm==4.56.2
     - typer==0.3.2
     - typing-extensions==3.7.4.3
