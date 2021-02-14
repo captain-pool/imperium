@@ -1,5 +1,6 @@
 import numpy as np
 import sklearn.cluster
+import absl.logging
 # Disconnected Clusters don't have high dimensional holes only 0D disconnectedness
 
 
@@ -7,11 +8,12 @@ import sklearn.cluster
 class ClusterDB:
   def __init__(self, vector_database):
     # Depends on max distance between similar points
-    self.cst = sklearn.cluster.DBSCAN(eps=0.5)
+    self.cst = sklearn.cluster.SpectralClustering(n_jobs=10, n_clusters=93)
     self.vct_db = vector_database
       
   def fit(self, vectors):
     assert not self.vct_db.initialized, "Vector DB is not empty."
+    absl.logging.info("starting clustering: %s" % self.cst)
     labels = self.cst.fit_predict(vectors)
     unique_labels = set(labels)
     centers = []

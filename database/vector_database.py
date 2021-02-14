@@ -59,7 +59,7 @@ class VectorDB:
       with open(self._payload_path, "rb") as f:
         self._payload = np.load(f)
       with open(self._inv_payload_path, "rb") as f:
-        self._inv_payload_path = pickle.load(f)
+        self._inv_payload = pickle.load(f)
       try:
         assert self._index.ntotal == len(self._payload),\
                "Number of Rows doesn't match"
