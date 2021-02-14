@@ -8,7 +8,7 @@ import absl.logging
 class ClusterDB:
   def __init__(self, vector_database):
     # Depends on max distance between similar points
-    self.cst = sklearn.cluster.SpectralClustering(n_jobs=10, n_clusters=93)
+    self.cst = sklearn.cluster.SpectralClustering(n_jobs=20, n_clusters=93)
     self.vct_db = vector_database
       
   def fit(self, vectors):

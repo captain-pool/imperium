@@ -1,42 +1,53 @@
 import flask
 from flask import request, jsonify
 from flask_cors import CORS
-import heapq
+import collections
 import queue
 import simsearch
 from status_codes import StatusCodes as status_codes
+import threading
+import ray
+import addict
+import database
 
-app = CORS(flask.Flask(__name__))
 
-Payload = collections.namedtuple("Payload", ['stamp', 'payload'])
+ray.init()
+
+app = flask.Flask(__name__)
+CORS(app)
+
+Payload = collections.namedtuple('Payload', ['stamp', 'payload'])
 
 inputq = queue.Queue()
 outputq = queue.Queue()
 
+vectorizer = database.Vectorize("en_core_web_sm")
 simobj = simsearch.SimSearch(
     "databases/vectordb",
     "databases/clusterdb",
-    "en_core_web_sm")
-
-second_thread = threading.Thread(target=launch_workers)
-second_thread.start()
+    vectorizer)
 
 @ray.remote
-def worker(payload):
-  url = simobj.query(payload.payload)
-  return Payload(payload.stamp, url)
+def worker(timestamp, payload):
+  url = simobj.query(payload)
+  return timestamp, url
 
 def launch_workers():
   while True:
     task = inputq.get()
-    outputq.put(worker.remote(task))
+    objid = worker.remote(task.stamp, task.payload)
+    outputq.put(objid)
 
-@app.route("/egress", methods=['POST']
+
+second_thread = threading.Thread(target=launch_workers)
+second_thread.start()
+
+@app.route("/egress", methods=['GET'])
 def get_result():
   try:
-    payload = ray.get(output.get(timeout=2))
+    payload = Payload(*ray.get(outputq.get(timeout=2)))
     return jsonify({"idx": payload.stamp, "urls": payload.payload})
-  except queue.Full:
+  except queue.Empty:
     return jsonify({"status": status_codes.NO_ITEM_IN_QUEUE})
   except ray.exceptions.GetTimeoutError:
     return jsonify({"status": status_codes.PROCESSING_NOT_COMPLETED})
@@ -47,9 +58,12 @@ def get_result():
 @app.route("/ingress", methods=['POST'])
 def ingress():
   try:
-    stamp = request.args.get("ts")
-    text = request.args.get("text")
+    stamp = request.json["ts"]
+    text = request.json["text"]
     inputq.put(Payload(stamp, text))
   except Exception as e:
     return jsonify({"status": status_codes.OTHER, "message": str(e)})
   return jsonify({"status": status_codes.QUEUED})
+
+
+app.run("0.0.0.0", 5000)
