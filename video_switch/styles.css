@@ -1,0 +1,90 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito&display=swap");
+
+body {
+  background-color: rgb(43, 43, 43);
+  color: white;
+
+  text-align: center;
+  font-family: "Nunito", sans-serif;
+}
+
+#videoPlayer {
+  margin-top: 50px;
+}
+
+.big_text {
+  background-color: rgb(20, 20, 20);
+  padding: 10px 20px;
+  width: 400px;
+  border-radius: 10px;
+  margin: 5px auto;
+  font-size: 18px;
+  font-weight: bold;
+
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+
+.small_text {
+  background-color: rgb(0, 101, 202);
+  padding: 10px;
+  margin: 10px auto;
+  width: 200px;
+
+  border-radius: 50px;
+
+  font-size: 14px;
+  font-weight: bold;
+
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+
+video {
+  border-radius: 10px;
+  transition: all 0.4s ease;
+}
+
+.pay_with_checkbook {
+  font-size: 16px;
+  padding: 10px 20px;
+  background-color: rgb(240, 240, 240);
+  color: rgb(59, 59, 59);
+  font-weight: bold;
+
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  font-family: "Nunito", sans-serif;
+
+  display: flex;
+  flex-direction: row;
+  transition: all 0.4s ease;
+
+  cursor: pointer;
+}
+
+.button_container {
+  width: 400px;
+  margin: 30px auto;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.button_container p {
+  position: relative;
+  top: -5px;
+}
+
+.pay_with_checkbook:hover {
+  color: rgb(255, 255, 255);
+  background-color: coral;
+}
+
+.vid_segment {
+  position: relative;
+  top: -60px;
+}
