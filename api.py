@@ -21,6 +21,7 @@ Payload = collections.namedtuple('Payload', ['stamp', 'payload'])
 inputq = queue.Queue()
 outputq = queue.Queue()
 
+previous = None
 vectorizer = database.Vectorize("en_core_web_sm")
 simobj = simsearch.SimSearch(
     "databases/vectordb",
@@ -57,10 +58,13 @@ def get_result():
 
 @app.route("/ingress", methods=['POST'])
 def ingress():
+  global previous
   try:
     stamp = request.json["ts"]
     text = request.json["text"]
-    inputq.put(Payload(stamp, text))
+    if text != previous:
+      inputq.put(Payload(stamp, text))
+      previous = text
   except Exception as e:
     return jsonify({"status": status_codes.OTHER, "message": str(e)})
   return jsonify({"status": status_codes.QUEUED})

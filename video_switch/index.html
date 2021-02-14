@@ -1,10 +1,8 @@
 <html>
-
 <head>
-    <title>😔 Imperium</title>
+    <title>:pensive: Imperium</title>
     <link rel="stylesheet" href="./styles.css" />
 </head>
-
 <body>
     <img src="https://media.giphy.com/media/6nZYNpm9icrCm7eAoF/giphy.gif" width="100px" />
     <div class="vid_segment">
@@ -12,152 +10,108 @@
             <source id='mp4Source' src="./easy.mp4" type="video/mp4" />
         </video>
     </div>
-
-
     <div id="show_speech"></div>
     <div id="show_segment"></div>
-
     <div class="button_container">
         <button class="pay_with_checkbook" onclick="send_checkbook_data()"><img src="./money.svg" width="20px"
                 style="margin-right:10px" />Create Checkbook Invoice</button>
         <p>'coz why not</p>
     </div>
-
     <script>
         var player = document.getElementById('videoPlayer');
         var mp4Vid = document.getElementById('mp4Source');
-
-        var path = './';
+        var path = '/Users/rick/Downlaods';
         var video_array = ['easy.mp4', 'abbreviation.mp4', 'abhorrent.mp4'];
-
-
         function pause(milliseconds) {
             var dt = new Date();
             while ((new Date()) - dt <= milliseconds) { /* Do nothing */ }
         }
-
-
         function loopthrough() {
             for (var i = 0; i < 3; i++) {
-
                 //await pause(player.duration*1000);
                 pause(3000);
             }
         }
-
-        setTimeout(change_video(video_array[0]), 20000);
+        //setTimeout(change_video(video_array[0]), 20000);
         //setTimeout(change_video(video_array[1]), 50000);
         //setTimeout(change_video(video_array[2]), 70000);
-
-
-        function change_video(link) {
+        function change_video(json) {
             player.pause();
-            mp4Vid.src = path + link;
+            console.log(json);
+            mp4Vid.src = json['urls'][0];
             player.load();
             player.play();
         }
-
             //setTimeout(loopthrough(), 2000);
-
     </script>
-
-
     <script type="text/javascript">
-
-        var rootlink = "https://95b62f5fed2f.ngrok.io/"
-
+        var rootlink = "http://localhost:5000/"
         var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
         var recognition = new SpeechRecognition();
-
         recognition.continuous = true;
         recognition.lang = 'en-US';
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
-
-
         recognition.start();
-
-
         recognition.onresult = function (event) {
             var current = event.resultIndex;
             var transcript = event.results[current][0].transcript;
             var timestamp = Date.now();
-
             //console.log(transcript);
             //console.log('Confidence: ' + event.results[current][0].confidence);
-
             var show_speech = "<p class='big_text'>" + transcript + "</p><p class='small_text'>Confidence : " + (((event.results[current][0].confidence) * 100).toString()).substring(0, 5) + "%</p>";
             document.getElementById('show_speech').innerHTML = show_speech;
             setTimeout(function () {
                 document.getElementById('show_speech').innerHTML = show_speech;
-            }, 100);
-
-            // if (phrase.toLowerCase() == 'jump') {
-            //     //var evt = new KeyboardEvent('keydown', { 'keyCode': 250, 'which': 250 });
-            //     //document.dispatchEvent(evt);
-            // }
-
-
+                send_data();
+            }, 1000);
+                setTimeout(get_data, 500);
             recognition.onend = function (event) {
                 recognition.start();
             }
-
-
-        //    async function send_data() {
-
-        //         var myHeaders = new Headers();
-        //         myHeaders.append("Content-Type", "application/json");
-
-        //         var raw = JSON.stringify({ "ts": timestamp, "text": transcript });
-
-        //         var requestOptions = {
-        //             method: 'POST',
-        //             headers: myHeaders,
-        //             body: raw,
-        //             redirect: 'follow'
-        //         };
-
-        //         fetch(rootlink + "ingress", requestOptions)
-        //             .then(response => response.text())
-        //             .then(result => function () {
-        //                 if (result.status == 4) {
-        //                     await get_data();
-        //                 }
-        //             })
-        //             .catch(error => console.log('error', error));
-        //     }
-
-        //     async function get_data() {
-        //         var requestOptions = {
-        //             method: 'GET',
-        //             redirect: 'follow'
-        //         };
-
-        //         fetch(rootlink + "egress", requestOptions)
-        //             .then(response => response.text())
-        //             .then(result => console.log(result))
-        //             .catch(error => console.log('error', error));
-        //     }
-
+           async function send_data() {
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                var raw = JSON.stringify({ "ts": timestamp, "text": transcript });
+                var requestOptions = {
+                    method: 'POST',
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: 'follow'
+                };
+                fetch(rootlink + "ingress", requestOptions)
+                    .then(response => response.text())
+                    /*.then(result => console.log(result))function () {
+                        console.log("hello");
+                        if (result.status == 4) {
+                           //get_data();
+                        }
+                    })*/
+                    .catch(error => console.log('error', error));
+            }
+            async function get_data() {
+                var requestOptions = {
+                    method: 'GET',
+                    redirect: 'follow'
+                };
+                fetch(rootlink + "egress", requestOptions)
+                    .then(response => response.text())
+                    .then(result => change_video(JSON.parse(result)))
+                    .catch(error => console.log('error', error));
+            }
         }
-
-
-
         function send_checkbook_data() {
             var myHeaders = new Headers();
             myHeaders.append("accept", "application/json");
             myHeaders.append("authorization", "413115c4f6634f087fb2528942ac9b18:4c2e1420364b36158f5fa3418667b121");
             myHeaders.append("content-type", "application/json");
-
             var raw = JSON.stringify({ "amount": 5, "description": "Invoice 123", "name": "Widgets Inc.", "recipient": "testing@checkbook.io" });
-
             var requestOptions = {
                 method: 'POST',
                 headers: myHeaders,
                 body: raw,
                 redirect: 'follow'
             };
-
             fetch("https://api.sandbox.checkbook.io/v3/invoice", requestOptions)
                 .then(response => response.text())
                 .then(result => console.log(result))
@@ -165,5 +119,4 @@
         }
     </script>
 </body>
-
 </html>
