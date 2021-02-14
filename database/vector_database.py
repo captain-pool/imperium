@@ -11,7 +11,7 @@ import faiss
 import numpy as np
 import _pickle as pickle
 
-class VectorDatabase:
+class VectorDB:
   """
     Database for storing Vectors and searching them by
     similarity.
@@ -25,12 +25,19 @@ class VectorDatabase:
     """
     name = os.path.basename(db_path)
     path = os.path.normpath(db_path)
+    self._init = None
     if not os.path.exists(path) or not os.path.isdir(path):
       os.makedirs(path)
     self._index_file = os.path.join(path, "%s.index" % name)
     self._payload_path = os.path.join(path, "%s.payload" % name)
     self._inv_payload_path = os.path.join(path, "%s.invpayload" % name)
     self._vector_dim = vector_dim
+  
+  @property
+  def initialized(self):
+    if self._init is None:
+      raise OSError("Database not opened")
+    return self._init
 
   def __repr__(self):
     if hasattr(self, "_payload"):
@@ -46,19 +53,26 @@ class VectorDatabase:
     """
       Opens the database for reading and writing
     """
+    self._init = True
     if os.path.exists(self._index_file) and os.path.exists(self._payload_path):
       self._index = faiss.read_index(self._index_file)
       with open(self._payload_path, "rb") as f:
         self._payload = np.load(f)
       with open(self._inv_payload_path, "rb") as f:
-        self._inv_payload_path = pickle.load(f)
-      assert self._index.ntotal == len(self._payload),\
-             "Number of Rows doesn't match"
-      return
+        self._inv_payload = pickle.load(f)
+      try:
+        assert self._index.ntotal == len(self._payload),\
+               "Number of Rows doesn't match"
+      except:
+        self._init = False
+        raise
+      return self
     print("No database found. Initializing a new one")
+    self._init = False
     self._index = faiss.IndexFlatL2(self._vector_dim)
     self._payload = np.asarray([], dtype=str)
     self._inv_payload = dict()
+    return self
 
   def nearest(self, vector, num_closest=1):
     """
@@ -88,6 +102,7 @@ class VectorDatabase:
         `True` if insertion was successful `False` if
         insertion fails.
     """
+    self._init = True
     if not string in self._payload:
       if len(vector.shape) < 2:
         vector = vector[np.newaxis, :]

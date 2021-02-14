@@ -1,0 +1,5 @@
+class StatusCodes:
+  NO_ITEM_IN_QUEUE = 1
+  PROCESSING_NOT_COMPLETED = 2
+  OTHER = 3
+  QUEUED = 4
