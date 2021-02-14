@@ -4,13 +4,18 @@ import nltk
 import pickle
 import collections
 from nltk.corpus import stopwords
+import nltk.stem
+import absl.logging
 
 Word = collections.namedtuple("Word", ["proper", "word", "vect"])
 
 class SimSearch:
   MAX_PHRASE_LENGTH = 3
-  def __init__(self, ddbpath, cdbpath, vctmodelname):
-    self.vct = database.Vectorize(vctmodelname)
+  def __init__(self, ddbpath, cdbpath, vctmodel):
+    self._ddbpath = ddbpath
+    self._cdbpath = cdbpath
+    self.vct = vctmodel
+    self.pstemmer = nltk.stem.PorterStemmer()
     vctdim = self.vct.dimension
     self.ddb = database.VectorDB(ddbpath, vctdim).open()
     with open("%s.pkl" % ddbpath, "rb") as f:
@@ -20,6 +25,11 @@ class SimSearch:
     nltk.download('stopwords')
     self.stopwds = set(stopwords.words("english"))
 
+  def __reduce__(self):
+    deserializer = SimSearch
+    serialized_data = (self._ddbpath, self._cdbpath, self.vct)
+    return deserializer, serialized_data
+
   def splitTokens(self, sentence):
     tokens = nltk.tokenize.word_tokenize(sentence)
     count = i = 0
@@ -28,15 +38,22 @@ class SimSearch:
       count = 0
       mindist = float("inf")
       minw = None
+      prevvct = None
+      prevw = None
       while count < SimSearch.MAX_PHRASE_LENGTH and i < len(tokens):
         currw = " ".join([currw, tokens[i]]).strip()
         if tokens[i] not in (self.stopwds | set(string.punctuation)):
           count += 1
         currwvct = self.vct(currw)
-        if currwvct[-1].pos_ in database.Vectorize.NOUNS:
-          minw = Word(word=currw, proper=True, vect=currwvct.vector)
+        if currwvct[-1].pos_ in database.Vectorize.NOUNS: # TODO: Fix Bug
+          if prevw is not None:
+            yield Word(word=prevw, proper=False, vect=prevvct.vector)
+          currwvct = self.vct(tokens[i])
+          minw = Word(word=tokens[i], proper=True, vect=currwvct.vector)
           i += 1
           break
+        prevvct = currwvct
+        prevw = currw
         dist = self.cdb.query(currwvct.vector)
         if dist < mindist:
           mindist = dist
@@ -46,11 +63,11 @@ class SimSearch:
 
   def fingerspell(self, token):
     print("Token: %s" % token)
-    raise NotImplementedError
 
   def queryVideoClip(self, token):
     if token.proper:
-      url = self.dictdb.get(token.word, None)
+      word = self.pstemmer.stem(token.word)
+      url = self.dictdb.get(word, None)
       if not url:
         url = self.fingerspell(list(token.word))
     else:
