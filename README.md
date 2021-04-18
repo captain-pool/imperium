@@ -1,4 +1,4 @@
-# Imperium
+# Imperium (Submission for [Stanford TreeHacks](treehacks.com) 2021 🌲)
 
 ## Inspiration
 The past year's events have made it even more pressing for our society to ensure the implementation inclusive practices and accessibility. The project stems from the sudden transition to online learning which disproportionally impacted students with disabilities
